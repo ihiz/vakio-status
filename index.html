@@ -127,7 +127,7 @@
         <!-- Match Results Section -->
         <div class="match-results">
             <h3>Matching Results:</h3>
-            <div id="matches-list"></div>
+            <div id="matches-list" class="hidden"></div>
         </div>
     </div>
 
@@ -284,4 +284,8 @@
                 });
             });
 
-            matchesList.append
+            matchesList.appendChild(resultsContainer);
+        }
+    </script>
+</body>
+</html>
