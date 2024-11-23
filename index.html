@@ -34,9 +34,7 @@
 <h2>State Matcher</h2>
 
 <!-- File upload for CSV -->
-<input type="file" id="csv-upload" accept=".csv">
-<button onclick="readCSV()">Load Combinations</button>
-
+<input type="file" id="csv-upload" accept=".csv" onchange="readCSV()">
 <h3>Enter State Values:</h3>
 <div id="state-inputs">
   <!-- Dynamically generated input fields will appear here -->
@@ -80,7 +78,7 @@
     activeCombinations.forEach((combination, index) => {
       let matches = 0;
       inputState.forEach((state, i) => {
-        // If the input state is empty, it matches any value
+        // If the input state is empty, it matches any value (wildcard behavior)
         if (state === '' || normalizeState(state) === normalizeState(combination[i])) {
           matches++;
         }
