@@ -29,7 +29,7 @@
 
         .state-row {
             display: flex;
-            justify-content: flex-start;
+            flex-direction: column;
             margin-bottom: 5px;
         }
 
@@ -46,12 +46,13 @@
         .match-count {
             font-size: 1.2em;
             font-weight: bold;
-            margin-left: 10px;
+            margin-top: 10px;
         }
 
         .match-row {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            align-items: flex-start;
             margin-bottom: 5px;
         }
 
@@ -95,7 +96,7 @@
         }
 
         .match-count {
-            margin-left: 10px;
+            margin-top: 10px;
         }
 
     </style>
@@ -225,10 +226,10 @@
                 return;
             }
 
+            // Create a container for results
             const resultsContainer = document.createElement('div');
             resultsContainer.classList.add('match-row');
             resultsContainer.style.display = 'flex';
-            resultsContainer.style.flexDirection = 'column';  // Change to column direction for rows
 
             // Create columns for 13/13, 12/13, 11/13, 10/13 matches
             const matchColumns = [[], [], [], []]; // To hold rows with specific match counts (13, 12, 11, 10)
@@ -251,7 +252,7 @@
                     matchRow.appendChild(stateDiv);
                 });
 
-                // Add the match count at the end of the row
+                // Add the match count at the bottom of the row (below the last element)
                 const matchCountDiv = document.createElement('div');
                 matchCountDiv.textContent = `${matchCount}/13`;
                 matchCountDiv.classList.add('match-count');
@@ -269,9 +270,6 @@
                 }
             });
 
-            // Clear previous match results
-            matchesList.innerHTML = '';
-            
             // Append columns (13, 12, 11, 10 matches)
             matchColumns.forEach(column => {
                 column.forEach(row => resultsContainer.appendChild(row));
