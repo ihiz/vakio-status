@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>State Matching App</title>
+    <title>Veikkaus Status</title>
     <style>
         .hidden {
             display: none;
@@ -36,7 +36,7 @@
         .state-cell {
             width: 35px;
             text-align: center;
-            padding: 4px;
+            padding: 7px;
         }
 
         .state-cell.highlight {
@@ -104,18 +104,12 @@
     </style>
 </head>
 <body>
-    <h1>State Matching App</h1>
+    <h1>Veikkaus Status</h1>
 
     <div class="input-section">
-        <!-- Upload file button placed above the input fields -->
-        <div>
-            <h3>Upload Active Combinations CSV:</h3>
-            <input type="file" id="file-input" accept=".csv">
-        </div>
-
         <!-- Input fields for 13 states -->
         <div class="input-fields">
-            <h3>Enter the current states (1, X, 2) for each of the 13 fields:</h3>
+            <h3>Enter the current status (1, X, 2) for each match:</h3>
             <div id="input-fields">
                 <!-- 13 Input Fields will be rendered here -->
             </div>
@@ -125,8 +119,12 @@
         <div class="match-results">
             <h3>Matching Results:</h3>
             <div id="matches-list" class="hidden"></div>
-        </div>
+        </div>   
     </div>
+        <div>
+            <h3>Upload Bets (semicolon separated):</h3>
+            <input type="file" id="file-input" accept=".csv">
+        </div>     
 
     <script>
         let activeCombinations = [];
