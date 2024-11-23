@@ -76,6 +76,8 @@
 
         .match-results {
             width: 35%;
+            display: flex;
+            flex-direction: column;
         }
 
         .state-input-row {
@@ -230,6 +232,7 @@
             const resultsContainer = document.createElement('div');
             resultsContainer.classList.add('match-row');
             resultsContainer.style.display = 'flex';
+            resultsContainer.style.flexDirection = 'row'; // Row for the results container
 
             // Create columns for 13/13, 12/13, 11/13, 10/13 matches
             const matchColumns = [[], [], [], []]; // To hold rows with specific match counts (13, 12, 11, 10)
