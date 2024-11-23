@@ -29,7 +29,32 @@
 
         .state-row {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .state-cell {
+            width: 30px;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .state-cell.highlight {
+            background-color: red;
+        }
+
+        .match-count {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .match-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .match-row div {
+            margin: 0 5px;
         }
     </style>
 </head>
@@ -111,50 +136,62 @@
             const inputStates = inputs.map(input => normalizeState(input.value));
 
             // Perform matching when any input field changes
-            const filteredCombinations = activeCombinations.filter(combination => {
-                let matchCount = 0;
-                let valid = true;
+            const filteredCombinations = activeCombinations
+                .map(combination => {
+                    let matchCount = 0;
+                    let valid = true;
 
-                for (let i = 0; i < 13; i++) {
-                    const inputState = inputStates[i];
-                    const combinationState = normalizeState(combination[i]);
+                    for (let i = 0; i < 13; i++) {
+                        const inputState = inputStates[i];
+                        const combinationState = normalizeState(combination[i]);
 
-                    // If inputState is empty, it's a wildcard and matches any value
-                    if (inputState === '') {
-                        matchCount++;
-                    } else if (inputState === combinationState) {
-                        matchCount++;
-                    } else {
-                        valid = false;
-                        break;
+                        // If inputState is empty, it's a wildcard and matches any value
+                        if (inputState === '') {
+                            matchCount++;
+                        } else if (inputState === combinationState) {
+                            matchCount++;
+                        } else {
+                            valid = false;
+                            break;
+                        }
                     }
-                }
 
-                return valid && matchCount >= 10; // Only keep rows with at least 10 matches
-            });
+                    return valid && matchCount >= 10 ? { combination, matchCount } : null;
+                })
+                .filter(row => row !== null)
+                .sort((a, b) => b.matchCount - a.matchCount); // Sort by match count, descending
 
-            displayResults(filteredCombinations, inputStates);
+            displayResults(filteredCombinations);
         }
 
         // Display the matching results below the input fields
-        function displayResults(filteredCombinations, inputStates) {
+        function displayResults(filteredCombinations) {
             const matchesList = document.getElementById('matches-list');
             matchesList.innerHTML = ''; // Clear previous results
 
-            filteredCombinations.forEach(combination => {
+            filteredCombinations.forEach(({ combination, matchCount }) => {
                 const matchRow = document.createElement('div');
                 matchRow.classList.add('state-row');
+                
                 combination.forEach((state, index) => {
                     const stateDiv = document.createElement('div');
-                    const inputState = inputStates[index];
+                    const inputState = normalizeState(document.querySelectorAll('.state-input')[index].value);
 
+                    // Highlight if the state doesn't match
                     if (inputState !== '' && normalizeState(state) !== inputState) {
                         stateDiv.classList.add('highlight');
                     }
 
                     stateDiv.textContent = state;
+                    stateDiv.classList.add('state-cell');
                     matchRow.appendChild(stateDiv);
                 });
+
+                // Add the match count at the end of the row
+                const matchCountDiv = document.createElement('div');
+                matchCountDiv.textContent = `${matchCount}/13`;
+                matchCountDiv.classList.add('match-count');
+                matchRow.appendChild(matchCountDiv);
 
                 matchesList.appendChild(matchRow);
             });
