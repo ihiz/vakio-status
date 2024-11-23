@@ -1,150 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>State Matcher</title>
-  <style>
-    .match {
-      margin: 5px 0;
-    }
-    .match.correct {
-      background-color: lightgreen;
-    }
-    .match.incorrect {
-      background-color: lightcoral;
-    }
-    .match span {
-      display: inline-block;
-      width: 20px;
-      text-align: center;
-    }
-    .input-field {
-      width: 30px;
-      text-align: center;
-      margin: 2px;
-    }
-    .row {
-      margin-bottom: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State Matching App</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        .highlight {
+            background-color: red;
+        }
+
+        .matches {
+            font-weight: bold;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .state-input {
+            width: 30px;
+            margin: 5px;
+            text-align: center;
+        }
+
+        .state-row {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
 </head>
 <body>
+    <h1>State Matching App</h1>
 
-<h2>State Matcher</h2>
+    <h3>Enter the current states (1, X, 2) for each of the 13 fields:</h3>
+    <div id="input-fields">
+        <!-- 13 Input Fields will be rendered here -->
+    </div>
 
-<!-- File upload for CSV -->
-<input type="file" id="csv-upload" accept=".csv" onchange="readCSV()">
-<h3>Enter State Values:</h3>
-<div id="state-inputs">
-  <!-- Dynamically generated input fields will appear here -->
-</div>
+    <br><br>
 
-<h3>Active Combinations (Matches)</h3>
-<div id="matches"></div>
+    <h3>Upload Active Combinations CSV:</h3>
+    <input type="file" id="file-input" accept=".csv">
 
-<script>
-  let activeCombinations = [];  // Array to hold the imported active combinations
+    <div class="results hidden" id="results">
+        <h3>Matching Results:</h3>
+        <div id="matches-list"></div>
+    </div>
 
-  // Function to read and process the CSV file
-  function readCSV() {
-    const fileInput = document.getElementById("csv-upload");
-    const file = fileInput.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const contents = event.target.result;
-        parseCSV(contents);
-      };
-      reader.readAsText(file);
-    }
-  }
+    <script>
+        // Initialize an empty array for active combinations
+        let activeCombinations = [];
 
-  // Function to parse CSV and update activeCombinations array
-  function parseCSV(csv) {
-    const rows = csv.split('\n');
-    activeCombinations = rows.map(row => row.split(';').map(cell => cell.trim().toUpperCase()));
-    generateInputs();
-  }
-
-  // Normalize the input and predefined combinations (trim whitespace and convert to uppercase)
-  function normalizeState(state) {
-    return state.trim().toUpperCase();
-  }
-
-  // A function to compare the input state with each active combination
-  function compareStates(inputState) {
-    const results = [];
-    activeCombinations.forEach((combination, index) => {
-      let matches = 0;
-      inputState.forEach((state, i) => {
-        // If the input state is empty, it matches any value (wildcard behavior)
-        if (state === '' || normalizeState(state) === normalizeState(combination[i])) {
-          matches++;
+        // Function to normalize the input states to handle case insensitivity and wildcard matching
+        function normalizeState(state) {
+            return state.trim().toUpperCase(); // Case-insensitive normalization
         }
-      });
-      if (matches >= 10) {  // Only consider combinations with 10 or more matches
-        results.push({ combination: combination.join(''), matches });
-      }
-    });
-    return results;
-  }
 
-  // Function to update the matches displayed on the page
-  function updateMatches() {
-    const inputState = [];
-    for (let i = 1; i <= 13; i++) {
-      const state = document.getElementById(`state-${i}`).value.trim();
-      inputState.push(state);
-    }
+        // Handle the file input and load the CSV data
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    const matches = compareStates(inputState);
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const csvContent = event.target.result;
+                parseCSV(csvContent);
+            };
+            reader.readAsText(file);
+        });
 
-    // Clear previous matches
-    const matchesDiv = document.getElementById('matches');
-    matchesDiv.innerHTML = '';
+        // Parse the CSV content and populate the activeCombinations array
+        function parseCSV(csvContent) {
+            activeCombinations = [];
+            const rows = csvContent.split("\n");
+            rows.forEach(row => {
+                const rowData = row.split(";");
+                if (rowData.length === 13) {
+                    activeCombinations.push(rowData);
+                }
+            });
+            generateInputFields();
+        }
 
-    // Display new matches
-    matches.sort((a, b) => b.matches - a.matches); // Sort matches by most matches
-    matches.forEach((match) => {
-      const matchDiv = document.createElement('div');
-      matchDiv.classList.add('match');
-      matchDiv.classList.add(match.matches === 13 ? 'correct' : 'incorrect');
-      matchDiv.innerHTML = `Combination: ${match.combination} | Matches: ${match.matches}`;
-      matchesDiv.appendChild(matchDiv);
-    });
-  }
+        // Function to generate the input fields for the 13 states
+        function generateInputFields() {
+            const inputContainer = document.getElementById('input-fields');
+            inputContainer.innerHTML = ''; // Clear any existing input fields
 
-  // Function to generate state input fields dynamically (1 to 13)
-  function generateInputs() {
-    const stateInputsDiv = document.getElementById('state-inputs');
-    stateInputsDiv.innerHTML = '';  // Clear any existing input fields
+            for (let i = 0; i < 13; i++) {
+                const inputField = document.createElement('input');
+                inputField.type = 'text';
+                inputField.classList.add('state-input');
+                inputField.maxLength = 1; // Only one character per input
+                inputField.dataset.index = i; // To track which field it corresponds to
+                inputField.addEventListener('input', handleInputChange); // Update on input change
+                inputContainer.appendChild(inputField);
+            }
 
-    // Create input fields for states 1 to 13
-    for (let i = 1; i <= 13; i++) {
-      const rowDiv = document.createElement('div');
-      rowDiv.classList.add('row');
-      const label = document.createElement('label');
-      label.textContent = `State ${i}: `;
-      const inputField = document.createElement('input');
-      inputField.classList.add('input-field');
-      inputField.type = 'text';
-      inputField.id = `state-${i}`;
-      inputField.maxLength = 1;
-      inputField.addEventListener('input', updateMatches);  // Recalculate matches on input change
-      rowDiv.appendChild(label);
-      rowDiv.appendChild(inputField);
-      stateInputsDiv.appendChild(rowDiv);
-    }
-  }
+            // Display results container when the user inputs a value
+            document.getElementById('results').classList.remove('hidden');
+        }
 
-  // Initialize the match display and inputs when the page loads
-  function init() {
-    generateInputs();  // Generate input fields
-  }
+        // Handle input change and trigger the matching function
+        function handleInputChange() {
+            const inputs = Array.from(document.querySelectorAll('.state-input'));
+            const inputStates = inputs.map(input => normalizeState(input.value));
 
-  init();  // Call initialization function on page load
-</script>
+            // Perform matching when any input field changes
+            const filteredCombinations = activeCombinations.filter(combination => {
+                let matchCount = 0;
+                let valid = true;
 
+                for (let i = 0; i < 13; i++) {
+                    const inputState = inputStates[i];
+                    const combinationState = normalizeState(combination[i]);
+
+                    // If inputState is empty, it's a wildcard and matches any value
+                    if (inputState === '') {
+                        matchCount++;
+                    } else if (inputState === combinationState) {
+                        matchCount++;
+                    } else {
+                        valid = false;
+                        break;
+                    }
+                }
+
+                return valid && matchCount >= 10; // Only keep rows with at least 10 matches
+            });
+
+            displayResults(filteredCombinations, inputStates);
+        }
+
+        // Display the matching results below the input fields
+        function displayResults(filteredCombinations, inputStates) {
+            const matchesList = document.getElementById('matches-list');
+            matchesList.innerHTML = ''; // Clear previous results
+
+            filteredCombinations.forEach(combination => {
+                const matchRow = document.createElement('div');
+                matchRow.classList.add('state-row');
+                combination.forEach((state, index) => {
+                    const stateDiv = document.createElement('div');
+                    const inputState = inputStates[index];
+
+                    if (inputState !== '' && normalizeState(state) !== inputState) {
+                        stateDiv.classList.add('highlight');
+                    }
+
+                    stateDiv.textContent = state;
+                    matchRow.appendChild(stateDiv);
+                });
+
+                matchesList.appendChild(matchRow);
+            });
+        }
+    </script>
 </body>
 </html>
