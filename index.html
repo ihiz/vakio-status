@@ -131,7 +131,7 @@
             document.getElementById('results').classList.remove('hidden');
         }
 
-        // Handle input change and trigger the matching function
+        // Function to handle input change and trigger the matching function
         function handleInputChange() {
             const inputs = Array.from(document.querySelectorAll('.state-input'));
             const inputStates = inputs.map(input => normalizeState(input.value));
@@ -140,32 +140,28 @@
             const filteredCombinations = activeCombinations
                 .map(combination => {
                     let matchCount = 0;
-                    let valid = true;
 
+                    // Check each field in the combination against the user input
                     for (let i = 0; i < 13; i++) {
                         const inputState = inputStates[i];
                         const combinationState = normalizeState(combination[i]);
 
                         // If inputState is empty, it's a wildcard and matches any value
-                        if (inputState === '') {
+                        if (inputState === '' || inputState === combinationState) {
                             matchCount++;
-                        } else if (inputState === combinationState) {
-                            matchCount++;
-                        } else {
-                            valid = false;
-                            break;
                         }
                     }
 
-                    return valid && matchCount >= 10 ? { combination, matchCount } : null;
+                    // Only include rows with at least 10 matching fields
+                    return matchCount >= 10 ? { combination, matchCount } : null;
                 })
-                .filter(row => row !== null) // Filter out invalid matches
-                .sort((a, b) => b.matchCount - a.matchCount); // Sort by match count, descending
+                .filter(row => row !== null) // Filter out rows that didn't match enough fields
+                .sort((a, b) => b.matchCount - a.matchCount); // Sort by match count in descending order
 
             displayResults(filteredCombinations);
         }
 
-        // Display the matching results below the input fields
+        // Function to display the matching results below the input fields
         function displayResults(filteredCombinations) {
             const matchesList = document.getElementById('matches-list');
             matchesList.innerHTML = ''; // Clear previous results
