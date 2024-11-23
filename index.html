@@ -68,13 +68,19 @@
 <div id="matches"></div>
 
 <script>
+  // Predefined combinations (usually this should come from your CSV file)
   const activeCombinations = [
     ['1', '1', '1', '1', 'X', '2', '1', '2', 'X', '1', '2', '1', 'X'],
     ['X', '2', 'X', '1', 'X', 'X', '2', '1', '1', 'X', 'X', '2', '1'],
     ['2', 'X', '1', '1', '2', 'X', '2', '1', 'X', '2', '1', 'X', 'X'],
     ['1', '2', 'X', 'X', 'X', '2', '1', 'X', '1', '1', 'X', 'X', '2'],
-    // More predefined active combinations go here...
+    // Add more predefined active combinations as needed...
   ];
+
+  // Normalize the input and predefined combinations (trim whitespace and convert to uppercase)
+  function normalizeState(state) {
+    return state.trim().toUpperCase();
+  }
 
   // A function to compare the input state with each active combination
   function compareStates(inputState) {
@@ -82,7 +88,8 @@
     activeCombinations.forEach((combination, index) => {
       let matches = 0;
       inputState.forEach((state, i) => {
-        if (state === '' || state.toUpperCase() === combination[i].toUpperCase()) {
+        // If the input state is empty, it matches any value
+        if (state === '' || normalizeState(state) === normalizeState(combination[i])) {
           matches++;
         }
       });
