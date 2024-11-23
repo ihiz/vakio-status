@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State Matcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .state-list {
+            margin-top: 20px;
+        }
+        .state-item {
+            margin: 5px 0;
+            font-family: monospace;
+        }
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+        .timer {
+            margin-top: 10px;
+        }
+        #refresh-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #refresh-button:hover {
+            background-color: #0056b3;
+        }
+        .state-inputs {
+            margin-top: 20px;
+        }
+        .state-input {
+            width: 30px;
+            text-align: center;
+            margin: 5px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>State Matcher</h1>
+
+    <!-- Upload Active Combinations -->
+    <h3>Upload Active Combinations</h3>
+    <input type="file" id="file-upload" accept=".txt, .csv" onchange="loadActiveCombinations(event)" />
+
+    <!-- Current States Inputs -->
+    <h3>Current States (Enter 1, X, or 2)</h3>
+    <div class="state-inputs">
+        <input type="text" id="state1" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state2" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state3" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state4" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state5" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state6" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state7" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state8" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state9" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state10" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state11" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state12" class="state-input" maxlength="1" oninput="compareStates()" />
+        <input type="text" id="state13" class="state-input" maxlength="1" oninput="compareStates()" />
+    </div>
+
+    <!-- List of matched combinations -->
+    <h3>Active Combinations</h3>
+    <div class="state-list" id="state-list"></div>
+
+    <!-- Refresh Button -->
+    <button id="refresh-button" onclick="compareStates()">Refresh Now</button>
+
+    <script>
+        let activeCombinations = []; // Store the active combinations (rows)
+        let currentStates = []; // Store the current states (user inputs)
+
+        // Load active combinations from file (CSV or text)
+        function loadActiveCombinations(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const content = e.target.result;
+                activeCombinations = content.split('\n').map(line => line.trim()); // Split by lines
+                compareStates(); // Run comparison after loading
+            };
+
+            reader.readAsText(file);
+        }
+
+        // Get current states from the input fields
+        function getCurrentStates() {
+            currentStates = [];
+            for (let i = 1; i <= 13; i++) {
+                const state = document.getElementById(`state${i}`).value.trim().toUpperCase();
+                if (state === '1' || state === 'X' || state === '2') {
+                    currentStates.push(state);
+                } else {
+                    currentStates.push(''); // Empty field if invalid input
+                }
+            }
+        }
+
+        // Compare current states with active combinations
+        function compareStates() {
+            getCurrentStates();
+
+            if (currentStates.length < 13 || currentStates.includes('')) {
+                document.getElementById('state-list').innerHTML = '<p>Please fill in all 13 matches here.</p>';
+                return;
+            }
+
+            const matches = activeCombinations.map(combination => {
+                let matchCount = 0;
+                for (let i = 0; i < 13; i++) {
+                    if (currentStates[i] === combination[i]) {
+                        matchCount++;
+                    }
+                }
+                return { combination, matchCount };
+            });
+
+            // Filter out combinations with fewer than 10 matches
+            const filteredMatches = matches.filter(item => item.matchCount >= 10);
+
+            // Sort combinations by match count (descending)
+            filteredMatches.sort((a, b) => b.matchCount - a.matchCount);
+
+            // Display results
+            let resultHTML = '';
+            filteredMatches.forEach(item => {
+                resultHTML += `<div class="state-item">${highlightIncorrectStates(item.combination, item.matchCount)}</div>`;
+            });
+
+            if (resultHTML === '') {
+                resultHTML = '<p>No active combinations with at least 10 matches.</p>';
+            }
+
+            document.getElementById('state-list').innerHTML = resultHTML;
+        }
+
+        // Highlight incorrect states (in red)
+        function highlightIncorrectStates(combination, matchCount) {
+            return combination.split('').map((char, i) => {
+                if (currentStates[i] !== char) {
+                    return `<span class="incorrect">${char}</span>`;
+                } else {
+                    return char;
+                }
+            }).join('');
+        }
+
+        // Optional: Initialize with dummy active combinations
+        // activeCombinations = [
+        //     "1X122X1X2121X",
+        //     "2X1X2X1X2122X",
+        //     "X12221X212X12",
+        //     "1XX2122X1X211",
+        //     "112X121X1X221",
+        //     "X12X2121X2212",
+        //     "121X2121X221X",
+        //     "X221X212X1212",
+        //     "X12221X1X2X21",
+        //     "112X1X1X21221",
+        //     "1X22221X2122X",
+        //     "2121X1X121221",
+        //     "121X2X1X12212",
+        // ];
+    </script>
+</body>
+</html>
