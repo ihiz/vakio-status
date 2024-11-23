@@ -52,41 +52,94 @@
         .match-row {
             display: flex;
             align-items: center;
+            margin-bottom: 5px;
         }
 
-        .match-row div {
-            margin: 0 3px;
+        .match-column {
+            flex: 1;
         }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .input-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .input-fields {
+            width: 60%;
+        }
+
+        .match-results {
+            width: 35%;
+        }
+
+        .state-input-row {
+            margin-bottom: 5px;
+        }
+
+        .state-input-row input {
+            width: 40px;
+            text-align: center;
+        }
+
+        .state-input-row label {
+            margin-right: 10px;
+        }
+
+        .state-cell {
+            width: 35px;
+            text-align: center;
+            padding: 4px;
+        }
+
+        .state-row .state-cell {
+            margin-right: 3px;
+        }
+
+        .match-count {
+            margin-left: 10px;
+        }
+
     </style>
 </head>
 <body>
     <h1>State Matching App</h1>
 
-    <h3>Enter the current states (1, X, 2) for each of the 13 fields:</h3>
-    <div id="input-fields">
-        <!-- 13 Input Fields will be rendered here -->
-    </div>
+    <div class="input-section">
+        <!-- Load file button first -->
+        <div>
+            <h3>Upload Active Combinations CSV:</h3>
+            <input type="file" id="file-input" accept=".csv">
+        </div>
 
-    <br><br>
+        <!-- Input fields for 13 states -->
+        <div class="input-fields">
+            <h3>Enter the current states (1, X, 2) for each of the 13 fields:</h3>
+            <div id="input-fields">
+                <!-- 13 Input Fields will be rendered here -->
+            </div>
+        </div>
 
-    <h3>Upload Active Combinations CSV:</h3>
-    <input type="file" id="file-input" accept=".csv">
-
-    <div class="results hidden" id="results">
-        <h3>Matching Results:</h3>
-        <div id="matches-list"></div>
+        <!-- Match Results Section -->
+        <div class="match-results">
+            <h3>Matching Results:</h3>
+            <div id="matches-list"></div>
+        </div>
     </div>
 
     <script>
-        // Initialize an empty array for active combinations
         let activeCombinations = [];
 
-        // Function to normalize the input states to handle case insensitivity and wildcard matching
+        // Normalize state to handle case insensitivity and wildcard matching
         function normalizeState(state) {
             return state.trim().toUpperCase(); // Case-insensitive normalization
         }
 
-        // Handle the file input and load the CSV data
+        // Handle file input and load CSV data
         document.getElementById('file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -99,7 +152,7 @@
             reader.readAsText(file);
         });
 
-        // Parse the CSV content and populate the activeCombinations array
+        // Parse CSV content and populate activeCombinations array
         function parseCSV(csvContent) {
             activeCombinations = [];
             const rows = csvContent.split("\n");
@@ -112,26 +165,33 @@
             generateInputFields();
         }
 
-        // Function to generate the input fields for the 13 states
+        // Generate input fields for 13 states
         function generateInputFields() {
             const inputContainer = document.getElementById('input-fields');
             inputContainer.innerHTML = ''; // Clear any existing input fields
 
             for (let i = 0; i < 13; i++) {
+                const row = document.createElement('div');
+                row.classList.add('state-input-row');
+                const label = document.createElement('label');
+                label.textContent = `${i + 1}:`;
+                row.appendChild(label);
+
                 const inputField = document.createElement('input');
                 inputField.type = 'text';
                 inputField.classList.add('state-input');
                 inputField.maxLength = 1; // Only one character per input
                 inputField.dataset.index = i; // To track which field it corresponds to
                 inputField.addEventListener('input', handleInputChange); // Update on input change
-                inputContainer.appendChild(inputField);
+                row.appendChild(inputField);
+                inputContainer.appendChild(row);
             }
 
             // Display results container when the user inputs a value
-            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('matches-list').classList.remove('hidden');
         }
 
-        // Function to handle input change and trigger the matching function
+        // Handle input change and trigger the matching function
         function handleInputChange() {
             const inputs = Array.from(document.querySelectorAll('.state-input'));
             const inputStates = inputs.map(input => normalizeState(input.value));
@@ -161,7 +221,7 @@
             displayResults(filteredCombinations);
         }
 
-        // Function to display the matching results below the input fields
+        // Display matching results in a side-by-side layout
         function displayResults(filteredCombinations) {
             const matchesList = document.getElementById('matches-list');
             matchesList.innerHTML = ''; // Clear previous results
@@ -170,10 +230,21 @@
                 matchesList.innerHTML = "<p>No matches found.</p>";
             }
 
+            const resultsContainer = document.createElement('div');
+            resultsContainer.classList.add('match-row');
+            resultsContainer.style.display = 'flex';
+            resultsContainer.style.flexDirection = 'row';
+
+            // Create columns for 13/13, 12/13, 11/13, 10/13 matches
+            const matchColumns = [[], [], [], []]; // To hold rows with specific match counts (13, 12, 11, 10)
+
             filteredCombinations.forEach(({ combination, matchCount }) => {
+                const matchColumn = document.createElement('div');
+                matchColumn.classList.add('match-column');
+
                 const matchRow = document.createElement('div');
                 matchRow.classList.add('state-row');
-                
+
                 combination.forEach((state, index) => {
                     const stateDiv = document.createElement('div');
                     const inputState = normalizeState(document.querySelectorAll('.state-input')[index].value);
@@ -194,9 +265,23 @@
                 matchCountDiv.classList.add('match-count');
                 matchRow.appendChild(matchCountDiv);
 
-                matchesList.appendChild(matchRow);
+                // Add match row to the corresponding column
+                if (matchCount === 13) {
+                    matchColumns[0].push(matchRow);
+                } else if (matchCount === 12) {
+                    matchColumns[1].push(matchRow);
+                } else if (matchCount === 11) {
+                    matchColumns[2].push(matchRow);
+                } else if (matchCount === 10) {
+                    matchColumns[3].push(matchRow);
+                }
             });
-        }
-    </script>
-</body>
-</html>
+
+            // Append match rows in the right order (13/13, 12/13, 11/13, 10/13)
+            matchColumns.forEach(column => {
+                column.forEach(row => {
+                    resultsContainer.appendChild(row);
+                });
+            });
+
+            matchesList.append
