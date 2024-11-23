@@ -33,49 +33,41 @@
 
 <h2>State Matcher</h2>
 
+<!-- File upload for CSV -->
+<input type="file" id="csv-upload" accept=".csv">
+<button onclick="readCSV()">Load Combinations</button>
+
+<h3>Enter State Values:</h3>
 <div id="state-inputs">
-  <div class="row">
-    <label for="state-1">State 1:</label>
-    <input class="input-field" type="text" id="state-1" maxlength="1">
-    <label for="state-2">State 2:</label>
-    <input class="input-field" type="text" id="state-2" maxlength="1">
-    <label for="state-3">State 3:</label>
-    <input class="input-field" type="text" id="state-3" maxlength="1">
-    <label for="state-4">State 4:</label>
-    <input class="input-field" type="text" id="state-4" maxlength="1">
-    <label for="state-5">State 5:</label>
-    <input class="input-field" type="text" id="state-5" maxlength="1">
-    <label for="state-6">State 6:</label>
-    <input class="input-field" type="text" id="state-6" maxlength="1">
-    <label for="state-7">State 7:</label>
-    <input class="input-field" type="text" id="state-7" maxlength="1">
-    <label for="state-8">State 8:</label>
-    <input class="input-field" type="text" id="state-8" maxlength="1">
-    <label for="state-9">State 9:</label>
-    <input class="input-field" type="text" id="state-9" maxlength="1">
-    <label for="state-10">State 10:</label>
-    <input class="input-field" type="text" id="state-10" maxlength="1">
-    <label for="state-11">State 11:</label>
-    <input class="input-field" type="text" id="state-11" maxlength="1">
-    <label for="state-12">State 12:</label>
-    <input class="input-field" type="text" id="state-12" maxlength="1">
-    <label for="state-13">State 13:</label>
-    <input class="input-field" type="text" id="state-13" maxlength="1">
-  </div>
+  <!-- Dynamically generated input fields will appear here -->
 </div>
 
 <h3>Active Combinations (Matches)</h3>
 <div id="matches"></div>
 
 <script>
-  // Predefined combinations (usually this should come from your CSV file)
-  const activeCombinations = [
-    ['1', '1', '1', '1', 'X', '2', '1', '2', 'X', '1', '2', '1', 'X'],
-    ['X', '2', 'X', '1', 'X', 'X', '2', '1', '1', 'X', 'X', '2', '1'],
-    ['2', 'X', '1', '1', '2', 'X', '2', '1', 'X', '2', '1', 'X', 'X'],
-    ['1', '2', 'X', 'X', 'X', '2', '1', 'X', '1', '1', 'X', 'X', '2'],
-    // Add more predefined active combinations as needed...
-  ];
+  let activeCombinations = [];  // Array to hold the imported active combinations
+
+  // Function to read and process the CSV file
+  function readCSV() {
+    const fileInput = document.getElementById("csv-upload");
+    const file = fileInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const contents = event.target.result;
+        parseCSV(contents);
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  // Function to parse CSV and update activeCombinations array
+  function parseCSV(csv) {
+    const rows = csv.split('\n');
+    activeCombinations = rows.map(row => row.split(';').map(cell => cell.trim().toUpperCase()));
+    generateInputs();
+  }
 
   // Normalize the input and predefined combinations (trim whitespace and convert to uppercase)
   function normalizeState(state) {
@@ -125,14 +117,35 @@
     });
   }
 
-  // Add event listeners to the input fields
-  const inputFields = document.querySelectorAll('.input-field');
-  inputFields.forEach(input => {
-    input.addEventListener('input', updateMatches);
-  });
+  // Function to generate state input fields dynamically (1 to 13)
+  function generateInputs() {
+    const stateInputsDiv = document.getElementById('state-inputs');
+    stateInputsDiv.innerHTML = '';  // Clear any existing input fields
 
-  // Initialize the match display on page load
-  updateMatches();
+    // Create input fields for states 1 to 13
+    for (let i = 1; i <= 13; i++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.classList.add('row');
+      const label = document.createElement('label');
+      label.textContent = `State ${i}: `;
+      const inputField = document.createElement('input');
+      inputField.classList.add('input-field');
+      inputField.type = 'text';
+      inputField.id = `state-${i}`;
+      inputField.maxLength = 1;
+      inputField.addEventListener('input', updateMatches);  // Recalculate matches on input change
+      rowDiv.appendChild(label);
+      rowDiv.appendChild(inputField);
+      stateInputsDiv.appendChild(rowDiv);
+    }
+  }
+
+  // Initialize the match display and inputs when the page loads
+  function init() {
+    generateInputs();  // Generate input fields
+  }
+
+  init();  // Call initialization function on page load
 </script>
 
 </body>
