@@ -22,7 +22,7 @@
         }
 
         .state-input {
-            width: 25px;
+            width: 40px;
             margin: 3px;
             text-align: center;
         }
@@ -34,7 +34,7 @@
         }
 
         .state-cell {
-            width: 25px;
+            width: 35px;
             text-align: center;
             padding: 4px;
         }
@@ -90,12 +90,6 @@
             margin-right: 10px;
         }
 
-        .state-cell {
-            width: 35px;
-            text-align: center;
-            padding: 4px;
-        }
-
         .state-row .state-cell {
             margin-right: 3px;
         }
@@ -110,7 +104,7 @@
     <h1>State Matching App</h1>
 
     <div class="input-section">
-        <!-- Load file button first -->
+        <!-- Upload file button placed above the input fields -->
         <div>
             <h3>Upload Active Combinations CSV:</h3>
             <input type="file" id="file-input" accept=".csv">
@@ -221,13 +215,14 @@
             displayResults(filteredCombinations);
         }
 
-        // Display matching results in a side-by-side layout
+        // Display matching results in columns next to input fields
         function displayResults(filteredCombinations) {
             const matchesList = document.getElementById('matches-list');
             matchesList.innerHTML = ''; // Clear previous results
 
             if (filteredCombinations.length === 0) {
                 matchesList.innerHTML = "<p>No matches found.</p>";
+                return;
             }
 
             const resultsContainer = document.createElement('div');
@@ -277,11 +272,9 @@
                 }
             });
 
-            // Append match rows in the right order (13/13, 12/13, 11/13, 10/13)
+            // Append the columns in the order of matches (13, 12, 11, 10)
             matchColumns.forEach(column => {
-                column.forEach(row => {
-                    resultsContainer.appendChild(row);
-                });
+                column.forEach(row => resultsContainer.appendChild(row));
             });
 
             matchesList.appendChild(resultsContainer);
