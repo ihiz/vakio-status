@@ -234,9 +234,6 @@
             const matchColumns = [[], [], [], []]; // To hold rows with specific match counts (13, 12, 11, 10)
 
             filteredCombinations.forEach(({ combination, matchCount }) => {
-                const matchColumn = document.createElement('div');
-                matchColumn.classList.add('match-column');
-
                 const matchRow = document.createElement('div');
                 matchRow.classList.add('state-row');
 
@@ -260,7 +257,7 @@
                 matchCountDiv.classList.add('match-count');
                 matchRow.appendChild(matchCountDiv);
 
-                // Add match row to the corresponding column
+                // Add match row to the corresponding match count column
                 if (matchCount === 13) {
                     matchColumns[0].push(matchRow);
                 } else if (matchCount === 12) {
@@ -271,6 +268,9 @@
                     matchColumns[3].push(matchRow);
                 }
             });
+
+            // Clear previous match results
+            matchesList.innerHTML = '';
 
             // Append the columns in the order of matches (13, 12, 11, 10)
             matchColumns.forEach(column => {
