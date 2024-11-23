@@ -228,7 +228,7 @@
             const resultsContainer = document.createElement('div');
             resultsContainer.classList.add('match-row');
             resultsContainer.style.display = 'flex';
-            resultsContainer.style.flexDirection = 'row';
+            resultsContainer.style.flexDirection = 'column';  // Change to column direction for rows
 
             // Create columns for 13/13, 12/13, 11/13, 10/13 matches
             const matchColumns = [[], [], [], []]; // To hold rows with specific match counts (13, 12, 11, 10)
@@ -271,8 +271,8 @@
 
             // Clear previous match results
             matchesList.innerHTML = '';
-
-            // Append the columns in the order of matches (13, 12, 11, 10)
+            
+            // Append columns (13, 12, 11, 10 matches)
             matchColumns.forEach(column => {
                 column.forEach(row => resultsContainer.appendChild(row));
             });
